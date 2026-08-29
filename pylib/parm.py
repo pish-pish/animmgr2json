@@ -24,6 +24,11 @@ class Parm[T](CamelCaseModel, SerializableType):
     def _serialize(self) -> Any:
         return self.value
 
+    @classmethod
+    def _deserialize(cls, value: Any) -> Any:
+        parm = cls("dum")
+        parm.value = value
+
 
 class ParmInt(Parm[int]):
     def __post_init__(self):

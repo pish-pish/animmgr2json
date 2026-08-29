@@ -35,8 +35,13 @@ class AnimKey(CamelCaseModel, SerializableType):
         return out[0] if len(out) == 1 else out
 
     @classmethod
-    def _deserialize(cls, value: list[int]) -> Any:
-        return cls(*value)
+    def _deserialize(cls, value: int | list[int]) -> Any:
+        if isinstance(value, list):
+            return cls(*value)
+        else:
+            animkey = cls()
+            animkey.frame_index = value
+            return cls
 
 
 @dataclass
@@ -167,8 +172,7 @@ if __name__ == "__main__":
             json.dump(mgr.to_dict(), f, indent=4)
     elif args.tobinary:
         with open(input_path, "r") as f:
-            mgr = AnimMgr.from_json(f)  # type: ignore
-
+            mgr = AnimMgr.from_json(f.read())
         mgr.write(output_path)
     else:
         raise SyntaxError(
