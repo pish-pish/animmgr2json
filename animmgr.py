@@ -47,15 +47,11 @@ class AnimKey(CamelCaseModel, SerializableType):
 @dataclass
 class AnimInfo(CamelCaseModel):
     name: str = ""
-    flags: ParmInt = field(init=False)
-    speed: ParmFloat = field(init=False)
+    flags: ParmInt = field(default_factory=lambda: ParmInt("p00"))
+    speed: ParmFloat = field(default_factory=lambda: ParmFloat("spd"))
     anim_keys: list[AnimKey] = field(default_factory=lambda: [])
     info_keys: list[AnimKey] = field(default_factory=lambda: [])
     event_keys: list[AnimKey] = field(default_factory=lambda: [])
-
-    def __post_init__(self):
-        self.flags = ParmInt("p00")
-        self.speed = ParmFloat("spd")
 
     def read(self, version: int, stream: BufferedIOBase):
         str_length = binary.read_u32(stream)
@@ -97,7 +93,7 @@ class AnimInfo(CamelCaseModel):
 
         self.flags.write(stream)
         self.speed.write(stream)
-        binary.write_u32(stream, -1)  # terminator
+        binary.write_u32(stream, binary.UINT_MAX)  # terminator
 
         # Anim Keys
         binary.write_u32(stream, len(self.anim_keys))
@@ -118,13 +114,9 @@ class AnimInfo(CamelCaseModel):
 @dataclass
 class AnimMgr(CamelCaseModel):
     version: int = 0
-    flags: ParmInt = field(init=False)
-    base_path: ParmString = field(init=False)
+    flags: ParmInt = field(default_factory=lambda: ParmInt(id="a00"))
+    base_path: ParmString = field(default_factory=lambda: ParmString("a01"))
     anim_infos: list[AnimInfo] = field(default_factory=lambda: [])
-
-    def __post_init__(self):
-        self.flags = ParmInt(id="a00")
-        self.base_path = ParmString("a01")
 
     def write(self, filepath: str | Path):
         with open(filepath, "wb") as stream:
@@ -133,7 +125,7 @@ class AnimMgr(CamelCaseModel):
 
             self.flags.write(stream)
             self.base_path.write(stream)
-            binary.write_u32(stream, -1)  # terminator
+            binary.write_u32(stream, binary.UINT_MAX)  # terminator
 
             for info in self.anim_infos:
                 info.write(stream)

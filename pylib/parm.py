@@ -3,12 +3,11 @@ import pylib.binary as binary
 from typing import Any
 from io import BufferedIOBase
 from dataclasses import dataclass, field
-from pylib.models import CamelCaseModel
 from mashumaro.types import SerializableType
 
 
 @dataclass
-class Parm[T](CamelCaseModel, SerializableType):
+class Parm[T](SerializableType):
     id: str
     length: int = 0
     value: T = field(init=False)
@@ -19,20 +18,21 @@ class Parm[T](CamelCaseModel, SerializableType):
 
     def write(self, stream: BufferedIOBase):
         stream.write(self.id.encode())
-        binary.write_u32(stream, self.length)
+        binary.write_u8(stream, self.length)
 
-    def _serialize(self) -> Any:
+    def _serialize(self) -> T:
         return self.value
 
     @classmethod
-    def _deserialize(cls, value: Any) -> Any:
+    def _deserialize(cls, value: T) -> "Parm[T]":
         parm = cls("dum")
         parm.value = value
+        # print(parm)
+        return parm
 
 
 class ParmInt(Parm[int]):
-    def __post_init__(self):
-        self.length = 4
+    length: int = 4
 
     def read(self, stream):
         super().read(stream)
@@ -41,11 +41,17 @@ class ParmInt(Parm[int]):
     def write(self, stream):
         super().write(stream)
         binary.write_u32(stream, self.value)
+        
+    @classmethod
+    def _deserialize(cls, value: int) -> Parm[int]:
+        parm = cls('dum')
+        parm.value = value
+        print(parm)
+        return parm
 
 
 class ParmFloat(Parm[float]):
-    def __post_init__(self):
-        self.length = 4
+    length: int = 4
 
     def read(self, stream):
         super().read(stream)
@@ -57,8 +63,7 @@ class ParmFloat(Parm[float]):
 
 
 class ParmString(Parm[str]):
-    def __post_init__(self) -> None:
-        self.length = 8
+    length: int = 8
 
     def read(self, stream):
         super().read(stream)
