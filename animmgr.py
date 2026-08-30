@@ -41,17 +41,21 @@ class AnimKey(CamelCaseModel, SerializableType):
         else:
             animkey = cls()
             animkey.frame_index = value
-            return cls
+            return animkey
 
 
 @dataclass
 class AnimInfo(CamelCaseModel):
     name: str = ""
-    flags: ParmInt = field(default_factory=lambda: ParmInt("p00"))
-    speed: ParmFloat = field(default_factory=lambda: ParmFloat("spd"))
+    flags: ParmInt = field(default_factory=lambda: ParmInt())
+    speed: ParmFloat = field(default_factory=lambda: ParmFloat())
     anim_keys: list[AnimKey] = field(default_factory=lambda: [])
     info_keys: list[AnimKey] = field(default_factory=lambda: [])
     event_keys: list[AnimKey] = field(default_factory=lambda: [])
+
+    def __post_init__(self):
+        self.flags.id = "p00"
+        self.speed.id = "spd"
 
     def read(self, version: int, stream: BufferedIOBase):
         str_length = binary.read_u32(stream)
@@ -114,11 +118,16 @@ class AnimInfo(CamelCaseModel):
 @dataclass
 class AnimMgr(CamelCaseModel):
     version: int = 0
-    flags: ParmInt = field(default_factory=lambda: ParmInt(id="a00"))
-    base_path: ParmString = field(default_factory=lambda: ParmString("a01"))
+    flags: ParmInt = field(default_factory=lambda: ParmInt())
+    base_path: ParmString = field(default_factory=lambda: ParmString())
     anim_infos: list[AnimInfo] = field(default_factory=lambda: [])
 
+    def __post_init__(self):
+        self.flags.id = "a00"
+        self.base_path.id = "a01"
+
     def write(self, filepath: str | Path):
+        print(f"Writing AnimMgr {filepath}:")
         with open(filepath, "wb") as stream:
             binary.write_u32(stream, self.version)
             binary.write_u32(stream, len(self.anim_infos))
@@ -133,6 +142,7 @@ class AnimMgr(CamelCaseModel):
     @classmethod
     def from_file(cls, filepath: str | Path):
         mgr = cls()
+        print(f"Reading AnimMgr {filepath}:")
         with open(filepath, "rb") as stream:
             mgr.version = binary.read_u32(stream)
             info_count = binary.read_u32(stream)

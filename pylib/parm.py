@@ -8,7 +8,7 @@ from mashumaro.types import SerializableType
 
 @dataclass
 class Parm[T](SerializableType):
-    id: str
+    id: str = "dum"  # dummy id
     length: int = 0
     value: T = field(init=False)
 
@@ -25,12 +25,12 @@ class Parm[T](SerializableType):
 
     @classmethod
     def _deserialize(cls, value: T) -> "Parm[T]":
-        parm = cls("dum")
+        parm = cls()
         parm.value = value
-        # print(parm)
         return parm
 
 
+@dataclass
 class ParmInt(Parm[int]):
     length: int = 4
 
@@ -41,15 +41,9 @@ class ParmInt(Parm[int]):
     def write(self, stream):
         super().write(stream)
         binary.write_u32(stream, self.value)
-        
-    @classmethod
-    def _deserialize(cls, value: int) -> Parm[int]:
-        parm = cls('dum')
-        parm.value = value
-        print(parm)
-        return parm
 
 
+@dataclass
 class ParmFloat(Parm[float]):
     length: int = 4
 
@@ -62,6 +56,7 @@ class ParmFloat(Parm[float]):
         binary.write_f32(stream, self.value)
 
 
+@dataclass
 class ParmString(Parm[str]):
     length: int = 8
 
