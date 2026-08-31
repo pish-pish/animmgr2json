@@ -160,10 +160,10 @@ class AnimMgr(CamelCaseModel):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", type=str, required=True)
-    parser.add_argument("-o", "--output", type=str, required=True)
-    parser.add_argument("--tojson", action="store_true")
-    parser.add_argument("--tobinary", action="store_true")
+    parser.add_argument("-i", "--input", type=str, required=True, help="<Required> Input path of file to convert.")
+    parser.add_argument("-o", "--output", type=str, required=True, help="<Required> Output path of converted file.")
+    parser.add_argument("--tojson", action="store_true", help="<Optional> Converts inputted binary file to json.")
+    parser.add_argument("--tobinary", action="store_true", help="<Optional> Converts inputted json file to binary.")
     args = parser.parse_args()
 
     input_path = Path(args.input)
