@@ -1,4 +1,6 @@
 # animmgr2json
+*Requires Python 3.12+*
+
 A python tool to convert Pikmin 1 AnimMgr files between binary (.bin/.key) and .json
 
 # BUILDING
